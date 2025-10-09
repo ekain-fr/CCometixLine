@@ -290,31 +290,81 @@ impl SettingsComponent {
                     .and_then(|v| v.as_u64())
                     .unwrap_or(80);
 
-                // Get warning color description
-                let warning_color_desc = if let Some(color_val) = segment.options.get("warning_color") {
+                // Get warning color description and ratatui color
+                let (warning_color_desc, warning_ratatui_color) = if let Some(color_val) = segment.options.get("warning_color") {
                     if let Some(c256) = color_val.get("c256").and_then(|v| v.as_u64()) {
-                        format!("256:{}", c256)
+                        (format!("256:{}", c256), Some(Color::Indexed(c256 as u8)))
                     } else if let Some(c16) = color_val.get("c16").and_then(|v| v.as_u64()) {
-                        format!("16:{}", c16)
+                        let color = match c16 {
+                            0 => Color::Black,
+                            1 => Color::Red,
+                            2 => Color::Green,
+                            3 => Color::Yellow,
+                            4 => Color::Blue,
+                            5 => Color::Magenta,
+                            6 => Color::Cyan,
+                            7 => Color::White,
+                            8 => Color::DarkGray,
+                            9 => Color::LightRed,
+                            10 => Color::LightGreen,
+                            11 => Color::LightYellow,
+                            12 => Color::LightBlue,
+                            13 => Color::LightMagenta,
+                            14 => Color::LightCyan,
+                            15 => Color::Gray,
+                            _ => Color::White,
+                        };
+                        (format!("16:{}", c16), Some(color))
                     } else {
-                        "Not set".to_string()
+                        ("Not set".to_string(), None)
                     }
                 } else {
-                    "Not set".to_string()
+                    ("Not set".to_string(), None)
                 };
 
-                // Get critical color description
-                let critical_color_desc = if let Some(color_val) = segment.options.get("critical_color") {
+                // Get critical color description and ratatui color
+                let (critical_color_desc, critical_ratatui_color) = if let Some(color_val) = segment.options.get("critical_color") {
                     if let Some(c256) = color_val.get("c256").and_then(|v| v.as_u64()) {
-                        format!("256:{}", c256)
+                        (format!("256:{}", c256), Some(Color::Indexed(c256 as u8)))
                     } else if let Some(c16) = color_val.get("c16").and_then(|v| v.as_u64()) {
-                        format!("16:{}", c16)
+                        let color = match c16 {
+                            0 => Color::Black,
+                            1 => Color::Red,
+                            2 => Color::Green,
+                            3 => Color::Yellow,
+                            4 => Color::Blue,
+                            5 => Color::Magenta,
+                            6 => Color::Cyan,
+                            7 => Color::White,
+                            8 => Color::DarkGray,
+                            9 => Color::LightRed,
+                            10 => Color::LightGreen,
+                            11 => Color::LightYellow,
+                            12 => Color::LightBlue,
+                            13 => Color::LightMagenta,
+                            14 => Color::LightCyan,
+                            15 => Color::Gray,
+                            _ => Color::White,
+                        };
+                        (format!("16:{}", c16), Some(color))
                     } else {
-                        "Not set".to_string()
+                        ("Not set".to_string(), None)
                     }
                 } else {
-                    "Not set".to_string()
+                    ("Not set".to_string(), None)
                 };
+
+                // Get bold settings
+                let warning_bold = segment
+                    .options
+                    .get("warning_bold")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+                let critical_bold = segment
+                    .options
+                    .get("critical_bold")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(true);
 
                 lines.extend(vec![
                     create_field_line(
@@ -327,11 +377,41 @@ impl SettingsComponent {
                     ),
                     create_field_line(
                         FieldSelection::WarningColor,
-                        vec![Span::raw(format!("├─ Warning Color: {}", warning_color_desc))],
+                        {
+                            let mut spans = vec![Span::raw(format!("├─ Warning Color: {} ", warning_color_desc))];
+                            if let Some(color) = warning_ratatui_color {
+                                spans.push(Span::styled("██".to_string(), Style::default().fg(color)));
+                            } else {
+                                spans.push(Span::styled("--".to_string(), Style::default().fg(Color::DarkGray)));
+                            }
+                            spans
+                        },
                     ),
                     create_field_line(
                         FieldSelection::CriticalColor,
-                        vec![Span::raw(format!("├─ Critical Color: {}", critical_color_desc))],
+                        {
+                            let mut spans = vec![Span::raw(format!("├─ Critical Color: {} ", critical_color_desc))];
+                            if let Some(color) = critical_ratatui_color {
+                                spans.push(Span::styled("██".to_string(), Style::default().fg(color)));
+                            } else {
+                                spans.push(Span::styled("--".to_string(), Style::default().fg(Color::DarkGray)));
+                            }
+                            spans
+                        },
+                    ),
+                    create_field_line(
+                        FieldSelection::WarningBold,
+                        vec![Span::raw(format!(
+                            "├─ Warning Bold: {}",
+                            if warning_bold { "[✓]" } else { "[ ]" }
+                        ))],
+                    ),
+                    create_field_line(
+                        FieldSelection::CriticalBold,
+                        vec![Span::raw(format!(
+                            "├─ Critical Bold: {}",
+                            if critical_bold { "[✓]" } else { "[ ]" }
+                        ))],
                     ),
                 ]);
             }

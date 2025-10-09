@@ -468,7 +468,7 @@ impl App {
                     .unwrap_or(false);
 
                 let field_count = if is_usage_segment {
-                    11 // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, WarningThreshold, CriticalThreshold, WarningColor, CriticalColor, Options
+                    13 // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, WarningThreshold, CriticalThreshold, WarningColor, CriticalColor, WarningBold, CriticalBold, Options
                 } else {
                     7 // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, Options
                 };
@@ -484,7 +484,9 @@ impl App {
                     FieldSelection::CriticalThreshold => 7,
                     FieldSelection::WarningColor => 8,
                     FieldSelection::CriticalColor => 9,
-                    FieldSelection::Options => 10,
+                    FieldSelection::WarningBold => 10,
+                    FieldSelection::CriticalBold => 11,
+                    FieldSelection::Options => 12,
                 };
                 let new_field = (current_field + delta).clamp(0, field_count - 1) as usize;
                 self.selected_field = match new_field {
@@ -498,7 +500,9 @@ impl App {
                     7 if is_usage_segment => FieldSelection::CriticalThreshold,
                     8 if is_usage_segment => FieldSelection::WarningColor,
                     9 if is_usage_segment => FieldSelection::CriticalColor,
-                    10 if is_usage_segment => FieldSelection::Options,
+                    10 if is_usage_segment => FieldSelection::WarningBold,
+                    11 if is_usage_segment => FieldSelection::CriticalBold,
+                    12 if is_usage_segment => FieldSelection::Options,
                     6 => FieldSelection::Options, // For non-usage segments
                     _ => FieldSelection::Enabled,
                 };
@@ -627,6 +631,46 @@ impl App {
                                 serde_json::Value::Number(new_value.into()),
                             );
                             self.status_message = Some(format!("Critical threshold set to {}%", new_value));
+                            self.preview.update_preview(&self.config);
+                        }
+                    }
+                    FieldSelection::WarningBold => {
+                        // Toggle warning bold option
+                        if let Some(segment) = self.config.segments.get_mut(self.selected_segment) {
+                            let current = segment
+                                .options
+                                .get("warning_bold")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false);
+                            let new_value = !current;
+                            segment.options.insert(
+                                "warning_bold".to_string(),
+                                serde_json::Value::Bool(new_value),
+                            );
+                            self.status_message = Some(format!(
+                                "Warning bold {}",
+                                if new_value { "enabled" } else { "disabled" }
+                            ));
+                            self.preview.update_preview(&self.config);
+                        }
+                    }
+                    FieldSelection::CriticalBold => {
+                        // Toggle critical bold option
+                        if let Some(segment) = self.config.segments.get_mut(self.selected_segment) {
+                            let current = segment
+                                .options
+                                .get("critical_bold")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(true);
+                            let new_value = !current;
+                            segment.options.insert(
+                                "critical_bold".to_string(),
+                                serde_json::Value::Bool(new_value),
+                            );
+                            self.status_message = Some(format!(
+                                "Critical bold {}",
+                                if new_value { "enabled" } else { "disabled" }
+                            ));
                             self.preview.update_preview(&self.config);
                         }
                     }

@@ -27,6 +27,8 @@ pub enum FieldSelection {
     CriticalThreshold,
     WarningColor,
     CriticalColor,
+    WarningBold,
+    CriticalBold,
 }
 
 #[derive(Default)]
