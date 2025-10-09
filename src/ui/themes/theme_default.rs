@@ -109,6 +109,42 @@ pub fn usage_segment() -> SegmentConfig {
     }
 }
 
+pub fn usage_5hour_segment() -> SegmentConfig {
+    SegmentConfig {
+        id: SegmentId::Usage5Hour,
+        enabled: false,
+        icon: IconConfig {
+            plain: "📊".to_string(),
+            nerd_font: "\u{f0a9e}".to_string(), // circle_slice_1
+        },
+        colors: ColorConfig {
+            icon: Some(AnsiColor::Color16 { c16: 14 }), // Cyan
+            text: Some(AnsiColor::Color16 { c16: 14 }),
+            background: None,
+        },
+        styles: TextStyleConfig::default(),
+        options: HashMap::new(),
+    }
+}
+
+pub fn usage_7day_segment() -> SegmentConfig {
+    SegmentConfig {
+        id: SegmentId::Usage7Day,
+        enabled: false,
+        icon: IconConfig {
+            plain: "📊".to_string(),
+            nerd_font: "\u{f0a9e}".to_string(), // circle_slice_1
+        },
+        colors: ColorConfig {
+            icon: Some(AnsiColor::Color16 { c16: 11 }), // Yellow (to differentiate from 5hour)
+            text: Some(AnsiColor::Color16 { c16: 11 }),
+            background: None,
+        },
+        styles: TextStyleConfig::default(),
+        options: HashMap::new(),
+    }
+}
+
 pub fn cost_segment() -> SegmentConfig {
     SegmentConfig {
         id: SegmentId::Cost,

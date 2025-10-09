@@ -244,6 +244,31 @@ Shows simplified Claude model names:
 
 Token usage percentage based on transcript analysis with context limit tracking.
 
+### Usage Segments
+
+Three usage tracking segments are available for monitoring Claude API usage:
+
+**Usage (Original)** - Shows combined usage info:
+- Displays 5-hour usage percentage
+- Shows 7-day reset date in compact format
+- Format: `24% · 10-7-2` (24% used, resets Oct 7 at 2am)
+
+**Usage (5-hour)** - Focused 5-hour window:
+- Shows 5-hour usage percentage with reset time
+- Format: `24% -> 11am`
+- Ideal for monitoring short-term API limits
+
+**Usage (7-day)** - Weekly usage tracking:
+- Shows 7-day usage percentage with full reset datetime
+- Format: `12% -> Oct 9, 5am`
+- Perfect for tracking weekly quota
+
+All usage segments:
+- Share the same API call and cache (efficient)
+- Use dynamic circle icons that change with utilization level
+- Are disabled by default (enable via config or TUI)
+- Auto-convert reset times from UTC to local timezone
+
 ## Configuration
 
 CCometixLine supports full configuration via TOML files and interactive TUI:
@@ -261,7 +286,7 @@ All segments are configurable with:
 - Color customization
 - Format options
 
-Supported segments: Directory, Git, Model, Usage, Time, Cost, OutputStyle
+Supported segments: Directory, Git, Model, ContextWindow, Usage, Usage5Hour, Usage7Day, Cost, Session, OutputStyle, Update
 
 
 ## Requirements

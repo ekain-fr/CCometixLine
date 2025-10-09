@@ -141,6 +141,24 @@ impl PreviewComponent {
                     secondary: "· 10-7-2".to_string(),
                     metadata: HashMap::new(),
                 },
+                SegmentId::Usage5Hour => SegmentData {
+                    primary: "24%".to_string(),
+                    secondary: "-> 11am".to_string(),
+                    metadata: {
+                        let mut map = HashMap::new();
+                        map.insert("dynamic_icon".to_string(), "\u{f0aa1}".to_string());
+                        map
+                    },
+                },
+                SegmentId::Usage7Day => SegmentData {
+                    primary: "12%".to_string(),
+                    secondary: "-> Oct 9, 5am".to_string(),
+                    metadata: {
+                        let mut map = HashMap::new();
+                        map.insert("dynamic_icon".to_string(), "\u{f0a9f}".to_string());
+                        map
+                    },
+                },
                 SegmentId::Cost => SegmentData {
                     primary: "$0.02".to_string(),
                     secondary: "".to_string(),

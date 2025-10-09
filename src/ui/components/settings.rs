@@ -32,6 +32,8 @@ impl SettingsComponent {
                 SegmentId::Git => "Git",
                 SegmentId::ContextWindow => "Context Window",
                 SegmentId::Usage => "Usage",
+                SegmentId::Usage5Hour => "Usage (5-hour)",
+                SegmentId::Usage7Day => "Usage (7-day)",
                 SegmentId::Cost => "Cost",
                 SegmentId::Session => "Session",
                 SegmentId::OutputStyle => "Output Style",

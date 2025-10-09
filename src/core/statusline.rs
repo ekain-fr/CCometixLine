@@ -489,6 +489,14 @@ pub fn collect_all_segments(
                 let segment = UsageSegment::new();
                 segment.collect(input)
             }
+            crate::config::SegmentId::Usage5Hour => {
+                let segment = Usage5HourSegment::new();
+                segment.collect(input)
+            }
+            crate::config::SegmentId::Usage7Day => {
+                let segment = Usage7DaySegment::new();
+                segment.collect(input)
+            }
             crate::config::SegmentId::Cost => {
                 let segment = CostSegment::new();
                 segment.collect(input)

@@ -238,3 +238,39 @@ pub fn usage_segment() -> SegmentConfig {
         },
     }
 }
+
+pub fn usage_5hour_segment() -> SegmentConfig {
+    SegmentConfig {
+        id: SegmentId::Usage5Hour,
+        enabled: false,
+        icon: IconConfig {
+            plain: "📊".to_string(),
+            nerd_font: "\u{f0a9e}".to_string(),
+        },
+        colors: ColorConfig {
+            icon: Some(AnsiColor::Color256 { c256: 16 }),
+            text: Some(AnsiColor::Color256 { c256: 16 }),
+            background: Some(AnsiColor::Color256 { c256: 153 }),
+        },
+        styles: TextStyleConfig { text_bold: true },
+        options: HashMap::new(),
+    }
+}
+
+pub fn usage_7day_segment() -> SegmentConfig {
+    SegmentConfig {
+        id: SegmentId::Usage7Day,
+        enabled: false,
+        icon: IconConfig {
+            plain: "📊".to_string(),
+            nerd_font: "\u{f0a9e}".to_string(),
+        },
+        colors: ColorConfig {
+            icon: Some(AnsiColor::Color256 { c256: 16 }),
+            text: Some(AnsiColor::Color256 { c256: 16 }),
+            background: Some(AnsiColor::Color256 { c256: 185 }),
+        },
+        styles: TextStyleConfig { text_bold: true },
+        options: HashMap::new(),
+    }
+}
