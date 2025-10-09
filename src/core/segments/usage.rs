@@ -125,7 +125,7 @@ impl UsageSegment {
                 } else {
                     (hour - 12, "pm")
                 };
-                return format!("{} {}, {}{}", month_name, local_dt.day(), hour_12, period);
+                return format!("{} {}:{}{}", month_name, local_dt.day(), hour_12, period);
             }
         }
         "?".to_string()

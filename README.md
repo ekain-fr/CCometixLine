@@ -297,7 +297,7 @@ Three usage tracking segments are available for monitoring Claude API usage:
 
 **Usage (7-day)** - Weekly usage tracking:
 - Shows 7-day usage percentage with full reset datetime
-- Format: `12% → Oct 9, 5am`
+- Format: `12% → Oct 9:5am`
 - Perfect for tracking weekly quota
 
 All usage segments:
