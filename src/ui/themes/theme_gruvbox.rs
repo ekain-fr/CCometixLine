@@ -187,15 +187,15 @@ pub fn usage_5hour_segment() -> SegmentConfig {
                 "critical_threshold".to_string(),
                 serde_json::Value::Number(80.into()),
             );
-            // Yellow for warning
+            // Yellow for warning (16-color palette)
             opts.insert(
                 "warning_color".to_string(),
-                serde_json::json!({"c256": 226}),
+                serde_json::json!({"c16": 11}),
             );
-            // Red for critical
+            // Red for critical (16-color palette)
             opts.insert(
                 "critical_color".to_string(),
-                serde_json::json!({"c256": 196}),
+                serde_json::json!({"c16": 9}),
             );
             opts
         },
@@ -211,8 +211,8 @@ pub fn usage_7day_segment() -> SegmentConfig {
             nerd_font: "\u{f0a9e}".to_string(),
         },
         colors: ColorConfig {
-            icon: Some(AnsiColor::Color16 { c16: 11 }),
-            text: Some(AnsiColor::Color16 { c16: 11 }),
+            icon: Some(AnsiColor::Color16 { c16: 12 }), // Light Blue
+            text: Some(AnsiColor::Color16 { c16: 12 }),
             background: None,
         },
         styles: TextStyleConfig::default(),
@@ -226,15 +226,15 @@ pub fn usage_7day_segment() -> SegmentConfig {
                 "critical_threshold".to_string(),
                 serde_json::Value::Number(80.into()),
             );
-            // Yellow for warning
+            // Yellow for warning (16-color palette)
             opts.insert(
                 "warning_color".to_string(),
-                serde_json::json!({"c256": 226}),
+                serde_json::json!({"c16": 11}),
             );
-            // Red for critical
+            // Red for critical (16-color palette)
             opts.insert(
                 "critical_color".to_string(),
-                serde_json::json!({"c256": 196}),
+                serde_json::json!({"c16": 9}),
             );
             opts
         },

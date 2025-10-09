@@ -345,8 +345,8 @@ text.c16 = 14
 [segments.options]
 warning_threshold = 60    # Turn yellow at 60% usage
 critical_threshold = 80   # Turn red at 80% usage
-warning_color.c256 = 226  # Yellow (256-color palette)
-critical_color.c256 = 196 # Red (256-color palette)
+warning_color.c16 = 11    # Yellow (16-color palette)
+critical_color.c16 = 9    # Red (16-color palette)
 ```
 
 **How it works:**
