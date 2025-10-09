@@ -210,7 +210,14 @@ impl SettingsComponent {
                 spans.extend(content);
                 Line::from(spans)
             };
-            let lines = vec![
+
+            // Check if this is a usage segment to show threshold fields
+            let is_usage_segment = matches!(
+                segment.id,
+                SegmentId::Usage5Hour | SegmentId::Usage7Day
+            );
+
+            let mut lines = vec![
                 Line::from(format!("{} Segment", segment_name)),
                 create_field_line(
                     FieldSelection::Enabled,
@@ -268,14 +275,75 @@ impl SettingsComponent {
                         }
                     ))],
                 ),
-                create_field_line(
-                    FieldSelection::Options,
-                    vec![Span::raw(format!(
-                        "└─ Options: {} items",
-                        segment.options.len()
-                    ))],
-                ),
             ];
+
+            // Add threshold fields for usage segments
+            if is_usage_segment {
+                let warning_threshold = segment
+                    .options
+                    .get("warning_threshold")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(60);
+                let critical_threshold = segment
+                    .options
+                    .get("critical_threshold")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(80);
+
+                // Get warning color description
+                let warning_color_desc = if let Some(color_val) = segment.options.get("warning_color") {
+                    if let Some(c256) = color_val.get("c256").and_then(|v| v.as_u64()) {
+                        format!("256:{}", c256)
+                    } else if let Some(c16) = color_val.get("c16").and_then(|v| v.as_u64()) {
+                        format!("16:{}", c16)
+                    } else {
+                        "Not set".to_string()
+                    }
+                } else {
+                    "Not set".to_string()
+                };
+
+                // Get critical color description
+                let critical_color_desc = if let Some(color_val) = segment.options.get("critical_color") {
+                    if let Some(c256) = color_val.get("c256").and_then(|v| v.as_u64()) {
+                        format!("256:{}", c256)
+                    } else if let Some(c16) = color_val.get("c16").and_then(|v| v.as_u64()) {
+                        format!("16:{}", c16)
+                    } else {
+                        "Not set".to_string()
+                    }
+                } else {
+                    "Not set".to_string()
+                };
+
+                lines.extend(vec![
+                    create_field_line(
+                        FieldSelection::WarningThreshold,
+                        vec![Span::raw(format!("├─ Warning Threshold: {}%", warning_threshold))],
+                    ),
+                    create_field_line(
+                        FieldSelection::CriticalThreshold,
+                        vec![Span::raw(format!("├─ Critical Threshold: {}%", critical_threshold))],
+                    ),
+                    create_field_line(
+                        FieldSelection::WarningColor,
+                        vec![Span::raw(format!("├─ Warning Color: {}", warning_color_desc))],
+                    ),
+                    create_field_line(
+                        FieldSelection::CriticalColor,
+                        vec![Span::raw(format!("├─ Critical Color: {}", critical_color_desc))],
+                    ),
+                ]);
+            }
+
+            // Add Options field (always last)
+            lines.push(create_field_line(
+                FieldSelection::Options,
+                vec![Span::raw(format!(
+                    "└─ Options: {} items",
+                    segment.options.len()
+                ))],
+            ));
             let text = Text::from(lines);
             let settings_block = Block::default()
                 .borders(Borders::ALL)

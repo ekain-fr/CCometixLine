@@ -462,7 +462,17 @@ impl App {
                 self.selected_segment = new_selection;
             }
             Panel::Settings => {
-                let field_count = 7; // Enabled, Icon, IconColor, TextColor, TextStyle, BackgroundColor, Options
+                // Check if current segment is a usage segment to determine field count
+                let is_usage_segment = self.config.segments.get(self.selected_segment)
+                    .map(|s| matches!(s.id, crate::config::SegmentId::Usage5Hour | crate::config::SegmentId::Usage7Day))
+                    .unwrap_or(false);
+
+                let field_count = if is_usage_segment {
+                    11 // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, WarningThreshold, CriticalThreshold, WarningColor, CriticalColor, Options
+                } else {
+                    7 // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, Options
+                };
+
                 let current_field = match self.selected_field {
                     FieldSelection::Enabled => 0i32,
                     FieldSelection::Icon => 1,
@@ -470,7 +480,11 @@ impl App {
                     FieldSelection::TextColor => 3,
                     FieldSelection::BackgroundColor => 4,
                     FieldSelection::TextStyle => 5,
-                    FieldSelection::Options => 6,
+                    FieldSelection::WarningThreshold => 6,
+                    FieldSelection::CriticalThreshold => 7,
+                    FieldSelection::WarningColor => 8,
+                    FieldSelection::CriticalColor => 9,
+                    FieldSelection::Options => 10,
                 };
                 let new_field = (current_field + delta).clamp(0, field_count - 1) as usize;
                 self.selected_field = match new_field {
@@ -480,7 +494,12 @@ impl App {
                     3 => FieldSelection::TextColor,
                     4 => FieldSelection::BackgroundColor,
                     5 => FieldSelection::TextStyle,
-                    6 => FieldSelection::Options,
+                    6 if is_usage_segment => FieldSelection::WarningThreshold,
+                    7 if is_usage_segment => FieldSelection::CriticalThreshold,
+                    8 if is_usage_segment => FieldSelection::WarningColor,
+                    9 if is_usage_segment => FieldSelection::CriticalColor,
+                    10 if is_usage_segment => FieldSelection::Options,
+                    6 => FieldSelection::Options, // For non-usage segments
                     _ => FieldSelection::Enabled,
                 };
             }
@@ -547,7 +566,9 @@ impl App {
                     FieldSelection::Icon => self.open_icon_selector(),
                     FieldSelection::IconColor
                     | FieldSelection::TextColor
-                    | FieldSelection::BackgroundColor => self.open_color_picker(),
+                    | FieldSelection::BackgroundColor
+                    | FieldSelection::WarningColor
+                    | FieldSelection::CriticalColor => self.open_color_picker(),
                     FieldSelection::TextStyle => {
                         // Toggle text bold style
                         if let Some(segment) = self.config.segments.get_mut(self.selected_segment) {
@@ -560,6 +581,52 @@ impl App {
                                     "disabled"
                                 }
                             ));
+                            self.preview.update_preview(&self.config);
+                        }
+                    }
+                    FieldSelection::WarningThreshold => {
+                        // Cycle through common warning thresholds
+                        if let Some(segment) = self.config.segments.get_mut(self.selected_segment) {
+                            let current = segment
+                                .options
+                                .get("warning_threshold")
+                                .and_then(|v| v.as_u64())
+                                .unwrap_or(60);
+                            let new_value = match current {
+                                x if x < 50 => 50,
+                                50 => 60,
+                                60 => 70,
+                                70 => 80,
+                                _ => 40,
+                            };
+                            segment.options.insert(
+                                "warning_threshold".to_string(),
+                                serde_json::Value::Number(new_value.into()),
+                            );
+                            self.status_message = Some(format!("Warning threshold set to {}%", new_value));
+                            self.preview.update_preview(&self.config);
+                        }
+                    }
+                    FieldSelection::CriticalThreshold => {
+                        // Cycle through common critical thresholds
+                        if let Some(segment) = self.config.segments.get_mut(self.selected_segment) {
+                            let current = segment
+                                .options
+                                .get("critical_threshold")
+                                .and_then(|v| v.as_u64())
+                                .unwrap_or(80);
+                            let new_value = match current {
+                                x if x < 70 => 70,
+                                70 => 80,
+                                80 => 90,
+                                90 => 95,
+                                _ => 60,
+                            };
+                            segment.options.insert(
+                                "critical_threshold".to_string(),
+                                serde_json::Value::Number(new_value.into()),
+                            );
+                            self.status_message = Some(format!("Critical threshold set to {}%", new_value));
                             self.preview.update_preview(&self.config);
                         }
                     }
@@ -584,7 +651,9 @@ impl App {
         if self.selected_panel == Panel::Settings
             && (self.selected_field == FieldSelection::IconColor
                 || self.selected_field == FieldSelection::TextColor
-                || self.selected_field == FieldSelection::BackgroundColor)
+                || self.selected_field == FieldSelection::BackgroundColor
+                || self.selected_field == FieldSelection::WarningColor
+                || self.selected_field == FieldSelection::CriticalColor)
         {
             self.color_picker.open();
         }
@@ -602,6 +671,36 @@ impl App {
                 FieldSelection::IconColor => segment.colors.icon = Some(color),
                 FieldSelection::TextColor => segment.colors.text = Some(color),
                 FieldSelection::BackgroundColor => segment.colors.background = Some(color),
+                FieldSelection::WarningColor => {
+                    // Store warning color in options
+                    let color_json = match color {
+                        crate::config::AnsiColor::Color256 { c256 } => {
+                            serde_json::json!({"c256": c256})
+                        }
+                        crate::config::AnsiColor::Color16 { c16 } => {
+                            serde_json::json!({"c16": c16})
+                        }
+                        crate::config::AnsiColor::Rgb { r, g, b } => {
+                            serde_json::json!({"r": r, "g": g, "b": b})
+                        }
+                    };
+                    segment.options.insert("warning_color".to_string(), color_json);
+                }
+                FieldSelection::CriticalColor => {
+                    // Store critical color in options
+                    let color_json = match color {
+                        crate::config::AnsiColor::Color256 { c256 } => {
+                            serde_json::json!({"c256": c256})
+                        }
+                        crate::config::AnsiColor::Color16 { c16 } => {
+                            serde_json::json!({"c16": c16})
+                        }
+                        crate::config::AnsiColor::Rgb { r, g, b } => {
+                            serde_json::json!({"r": r, "g": g, "b": b})
+                        }
+                    };
+                    segment.options.insert("critical_color".to_string(), color_json);
+                }
                 _ => {}
             }
             self.preview.update_preview(&self.config);

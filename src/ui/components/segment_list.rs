@@ -22,6 +22,11 @@ pub enum FieldSelection {
     BackgroundColor,
     TextStyle,
     Options,
+    // Threshold fields (only shown for usage segments)
+    WarningThreshold,
+    CriticalThreshold,
+    WarningColor,
+    CriticalColor,
 }
 
 #[derive(Default)]
