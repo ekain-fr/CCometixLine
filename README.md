@@ -305,6 +305,7 @@ All usage segments:
 - Use dynamic circle icons that change with utilization level
 - Are disabled by default (enable via config or TUI)
 - Auto-convert reset times from UTC to local timezone
+- **Support threshold-based warning colors** (see below)
 
 ## Configuration
 
@@ -324,6 +325,44 @@ All segments are configurable with:
 - Format options
 
 Supported segments: Directory, Git, Model, ContextWindow, Usage, Usage5Hour, Usage7Day, Cost, Session, OutputStyle, Update
+
+### Threshold-Based Warning Colors
+
+Usage segments (Usage5Hour and Usage7Day) support dynamic color changes based on utilization thresholds. This allows you to get visual warnings when your API usage approaches limits.
+
+**Configuration example:**
+
+```toml
+[[segments]]
+id = "usage_5hour"
+enabled = true
+
+[segments.colors]
+# Default colors (used when under warning threshold)
+icon.c16 = 14  # Cyan
+text.c16 = 14
+
+[segments.options]
+warning_threshold = 60    # Turn yellow at 60% usage
+critical_threshold = 80   # Turn red at 80% usage
+warning_color.c256 = 226  # Yellow (256-color palette)
+critical_color.c256 = 196 # Red (256-color palette)
+```
+
+**How it works:**
+- **< 60%**: Uses default segment colors (cyan)
+- **≥ 60%**: Text changes to warning color (yellow)
+- **≥ 80%**: Text changes to critical color (red)
+
+You can customize thresholds and colors for each usage segment independently. The colors can be specified using:
+- `c16`: 16-color ANSI palette (0-15)
+- `c256`: 256-color palette (0-255)
+- RGB values (e.g., `{r = 255, g = 165, b = 0}`)
+
+**Common color codes:**
+- Yellow: `c256 = 226` or `c16 = 11`
+- Red: `c256 = 196` or `c16 = 9`
+- Orange: `c256 = 208` or `c256 = 214`
 
 
 ## Requirements

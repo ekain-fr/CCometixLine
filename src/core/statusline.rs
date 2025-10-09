@@ -221,6 +221,30 @@ impl StatusLineGenerator {
             self.get_icon(config)
         };
 
+        // Check for text color override in metadata
+        let text_color = if let Some(color_override_json) = data.metadata.get("text_color_override") {
+            // Parse the color override from JSON string
+            if let Ok(color_val) = serde_json::from_str::<serde_json::Value>(color_override_json) {
+                if let Some(c256) = color_val.get("c256").and_then(|v| v.as_u64()) {
+                    Some(AnsiColor::Color256 { c256: c256 as u8 })
+                } else if let Some(c16) = color_val.get("c16").and_then(|v| v.as_u64()) {
+                    Some(AnsiColor::Color16 { c16: c16 as u8 })
+                } else if let (Some(r), Some(g), Some(b)) = (
+                    color_val.get("r").and_then(|v| v.as_u64()),
+                    color_val.get("g").and_then(|v| v.as_u64()),
+                    color_val.get("b").and_then(|v| v.as_u64()),
+                ) {
+                    Some(AnsiColor::Rgb { r: r as u8, g: g as u8, b: b as u8 })
+                } else {
+                    config.colors.text.clone()
+                }
+            } else {
+                config.colors.text.clone()
+            }
+        } else {
+            config.colors.text.clone()
+        };
+
         // Apply background color to the entire segment if set
         if let Some(bg_color) = &config.colors.background {
             let bg_code = self.apply_background_color(bg_color);
@@ -236,7 +260,7 @@ impl StatusLineGenerator {
             let text_styled = self
                 .apply_style(
                     &data.primary,
-                    config.colors.text.as_ref(),
+                    text_color.as_ref(),
                     config.styles.text_bold,
                 )
                 .replace("\x1b[0m", "");
@@ -247,7 +271,7 @@ impl StatusLineGenerator {
                 let secondary_styled = self
                     .apply_style(
                         &data.secondary,
-                        config.colors.text.as_ref(),
+                        text_color.as_ref(),
                         config.styles.text_bold,
                     )
                     .replace("\x1b[0m", "");
@@ -261,7 +285,7 @@ impl StatusLineGenerator {
             let icon_colored = self.apply_color(&icon, config.colors.icon.as_ref());
             let text_styled = self.apply_style(
                 &data.primary,
-                config.colors.text.as_ref(),
+                text_color.as_ref(),
                 config.styles.text_bold,
             );
 
@@ -272,7 +296,7 @@ impl StatusLineGenerator {
                     " {}",
                     self.apply_style(
                         &data.secondary,
-                        config.colors.text.as_ref(),
+                        text_color.as_ref(),
                         config.styles.text_bold
                     )
                 ));
