@@ -182,6 +182,43 @@ New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\ccline"
 copy target\release\ccometixline.exe "$env:USERPROFILE\.claude\ccline\ccline.exe"
 ```
 
+### Running a Forked Version
+
+If you're running a forked version with the latest changes, you'll need to rebuild and reinstall after pulling updates:
+
+```bash
+# Navigate to your forked repository
+cd /path/to/your/CCometixLine
+
+# Pull latest changes
+git pull
+
+# Rebuild the binary
+cargo build --release
+
+# Install to local directory (recommended for testing)
+# Linux/macOS
+cp target/release/ccometixline ~/.claude/ccline/ccline
+
+# Or install to system location (if using Homebrew path)
+# macOS
+cp target/release/ccometixline /opt/homebrew/bin/ccline
+
+# Or install to system location
+# Linux
+sudo cp target/release/ccometixline /usr/local/bin/ccline
+
+# Verify version
+ccline --version
+```
+
+**After updating the binary**, if you've added new segments or themes:
+1. Remove old theme cache: `rm -rf ~/.claude/ccline/themes`
+2. Reinitialize if needed: `ccline --init`
+3. Use TUI configurator to enable new segments: `ccline -c`
+
+**Note**: The binary name in the repository is `ccometixline`, but it's renamed to `ccline` for convenience.
+
 ## Usage
 
 ### Configuration Management
