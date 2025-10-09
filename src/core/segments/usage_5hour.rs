@@ -25,7 +25,7 @@ impl Segment for Usage5HourSegment {
 
         let five_hour_percent = five_hour_util.round() as u8;
         let primary = format!("{}%", five_hour_percent);
-        let secondary = format!("-> {}", reset_time);
+        let secondary = format!("→ {}", reset_time);
 
         let mut metadata = HashMap::new();
         metadata.insert("dynamic_icon".to_string(), dynamic_icon);

@@ -25,7 +25,7 @@ impl Segment for Usage7DaySegment {
 
         let seven_day_percent = seven_day_util.round() as u8;
         let primary = format!("{}%", seven_day_percent);
-        let secondary = format!("-> {}", reset_time);
+        let secondary = format!("→ {}", reset_time);
 
         let mut metadata = HashMap::new();
         metadata.insert("dynamic_icon".to_string(), dynamic_icon);
