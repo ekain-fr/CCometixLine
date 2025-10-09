@@ -245,6 +245,13 @@ impl StatusLineGenerator {
             config.colors.text.clone()
         };
 
+        // Check for text bold override in metadata
+        let text_bold = if let Some(bold_override) = data.metadata.get("text_bold_override") {
+            bold_override.parse::<bool>().unwrap_or(config.styles.text_bold)
+        } else {
+            config.styles.text_bold
+        };
+
         // Apply background color to the entire segment if set
         if let Some(bg_color) = &config.colors.background {
             let bg_code = self.apply_background_color(bg_color);
@@ -261,7 +268,7 @@ impl StatusLineGenerator {
                 .apply_style(
                     &data.primary,
                     text_color.as_ref(),
-                    config.styles.text_bold,
+                    text_bold,
                 )
                 .replace("\x1b[0m", "");
 
@@ -272,7 +279,7 @@ impl StatusLineGenerator {
                     .apply_style(
                         &data.secondary,
                         text_color.as_ref(),
-                        config.styles.text_bold,
+                        text_bold,
                     )
                     .replace("\x1b[0m", "");
                 segment_content.push_str(&format!("{} ", secondary_styled));
@@ -286,7 +293,7 @@ impl StatusLineGenerator {
             let text_styled = self.apply_style(
                 &data.primary,
                 text_color.as_ref(),
-                config.styles.text_bold,
+                text_bold,
             );
 
             let mut segment = format!("{} {}", icon_colored, text_styled);
@@ -297,7 +304,7 @@ impl StatusLineGenerator {
                     self.apply_style(
                         &data.secondary,
                         text_color.as_ref(),
-                        config.styles.text_bold
+                        text_bold
                     )
                 ));
             }

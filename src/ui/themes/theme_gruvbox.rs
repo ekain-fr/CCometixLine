@@ -197,6 +197,15 @@ pub fn usage_5hour_segment() -> SegmentConfig {
                 "critical_color".to_string(),
                 serde_json::json!({"c16": 9}),
             );
+            // Bold text for warnings
+            opts.insert(
+                "warning_bold".to_string(),
+                serde_json::Value::Bool(false),
+            );
+            opts.insert(
+                "critical_bold".to_string(),
+                serde_json::Value::Bool(true),
+            );
             opts
         },
     }
@@ -235,6 +244,15 @@ pub fn usage_7day_segment() -> SegmentConfig {
             opts.insert(
                 "critical_color".to_string(),
                 serde_json::json!({"c16": 9}),
+            );
+            // Bold text for warnings
+            opts.insert(
+                "warning_bold".to_string(),
+                serde_json::Value::Bool(false),
+            );
+            opts.insert(
+                "critical_bold".to_string(),
+                serde_json::Value::Bool(true),
             );
             opts
         },

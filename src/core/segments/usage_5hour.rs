@@ -63,6 +63,43 @@ impl Usage5HourSegment {
             None
         }
     }
+
+    fn should_be_bold(&self, utilization: f64) -> Option<bool> {
+        // Load config to get threshold settings
+        let config = Config::load().ok()?;
+        let segment_config = config.segments.iter().find(|s| s.id == SegmentId::Usage5Hour)?;
+
+        // Get threshold values from options
+        let warning_threshold = segment_config
+            .options
+            .get("warning_threshold")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(60) as f64;
+
+        let critical_threshold = segment_config
+            .options
+            .get("critical_threshold")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(80) as f64;
+
+        // Determine if text should be bold based on utilization
+        if utilization >= critical_threshold {
+            // Critical threshold - check critical_bold option
+            segment_config
+                .options
+                .get("critical_bold")
+                .and_then(|v| v.as_bool())
+        } else if utilization >= warning_threshold {
+            // Warning threshold - check warning_bold option
+            segment_config
+                .options
+                .get("warning_bold")
+                .and_then(|v| v.as_bool())
+        } else {
+            // Below warning threshold - no bold override
+            None
+        }
+    }
 }
 
 impl Segment for Usage5HourSegment {
@@ -99,6 +136,11 @@ impl Segment for Usage5HourSegment {
                 }
             };
             metadata.insert("text_color_override".to_string(), color_json);
+        }
+
+        // Check if we need to apply threshold-based bold override
+        if let Some(should_bold) = self.should_be_bold(five_hour_util) {
+            metadata.insert("text_bold_override".to_string(), should_bold.to_string());
         }
 
         Some(SegmentData {
