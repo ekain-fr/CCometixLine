@@ -177,7 +177,34 @@ pub fn usage_5hour_segment() -> SegmentConfig {
             background: None,
         },
         styles: TextStyleConfig::default(),
-        options: HashMap::new(),
+        options: {
+            let mut opts = HashMap::new();
+            opts.insert(
+                "warning_threshold".to_string(),
+                serde_json::Value::Number(60.into()),
+            );
+            opts.insert(
+                "critical_threshold".to_string(),
+                serde_json::Value::Number(80.into()),
+            );
+            opts.insert(
+                "warning_color".to_string(),
+                serde_json::json!({"c16": 11}),
+            );
+            opts.insert(
+                "critical_color".to_string(),
+                serde_json::json!({"c16": 9}),
+            );
+            opts.insert(
+                "warning_bold".to_string(),
+                serde_json::Value::Bool(false),
+            );
+            opts.insert(
+                "critical_bold".to_string(),
+                serde_json::Value::Bool(true),
+            );
+            opts
+        },
     }
 }
 
@@ -195,6 +222,33 @@ pub fn usage_7day_segment() -> SegmentConfig {
             background: None,
         },
         styles: TextStyleConfig::default(),
-        options: HashMap::new(),
+        options: {
+            let mut opts = HashMap::new();
+            opts.insert(
+                "warning_threshold".to_string(),
+                serde_json::Value::Number(60.into()),
+            );
+            opts.insert(
+                "critical_threshold".to_string(),
+                serde_json::Value::Number(80.into()),
+            );
+            opts.insert(
+                "warning_color".to_string(),
+                serde_json::json!({"c16": 11}),
+            );
+            opts.insert(
+                "critical_color".to_string(),
+                serde_json::json!({"c16": 9}),
+            );
+            opts.insert(
+                "warning_bold".to_string(),
+                serde_json::Value::Bool(false),
+            );
+            opts.insert(
+                "critical_bold".to_string(),
+                serde_json::Value::Bool(true),
+            );
+            opts
+        },
     }
 }
