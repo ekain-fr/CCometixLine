@@ -25,6 +25,11 @@ use ratatui::{
 };
 use std::io;
 
+// Field count constants to avoid hardcoding
+// These represent the number of configurable fields in the Settings panel
+const DEFAULT_SEGMENT_FIELD_COUNT: usize = 7;  // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, Options
+const THRESHOLD_SEGMENT_FIELD_COUNT: usize = 13; // Default fields + WarningThreshold, CriticalThreshold, WarningColor, CriticalColor, WarningBold, CriticalBold
+
 pub struct App {
     config: Config,
     selected_segment: usize,
@@ -469,9 +474,9 @@ impl App {
                     .unwrap_or(false);
 
                 let field_count = if is_usage_segment {
-                    13 // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, WarningThreshold, CriticalThreshold, WarningColor, CriticalColor, WarningBold, CriticalBold, Options
+                    THRESHOLD_SEGMENT_FIELD_COUNT
                 } else {
-                    7 // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, Options
+                    DEFAULT_SEGMENT_FIELD_COUNT
                 };
 
                 let current_field = match self.selected_field {
@@ -489,7 +494,7 @@ impl App {
                     FieldSelection::CriticalBold => 11,
                     FieldSelection::Options => 12,
                 };
-                let new_field = (current_field + delta).clamp(0, field_count - 1) as usize;
+                let new_field = (current_field + delta).clamp(0, (field_count - 1) as i32) as usize;
                 self.selected_field = match new_field {
                     0 => FieldSelection::Enabled,
                     1 => FieldSelection::Icon,
@@ -718,13 +723,17 @@ impl App {
                 FieldSelection::BackgroundColor => segment.colors.background = Some(color),
                 FieldSelection::WarningColor => {
                     // Store warning color in options using shared helper
-                    let color_json: serde_json::Value = serde_json::from_str(&color_utils::serialize_ansi_color_to_json(&color)).unwrap();
-                    segment.options.insert("warning_color".to_string(), color_json);
+                    let color_str = color_utils::serialize_ansi_color_to_json(&color);
+                    if let Ok(color_json) = serde_json::from_str::<serde_json::Value>(&color_str) {
+                        segment.options.insert("warning_color".to_string(), color_json);
+                    }
                 }
                 FieldSelection::CriticalColor => {
                     // Store critical color in options using shared helper
-                    let color_json: serde_json::Value = serde_json::from_str(&color_utils::serialize_ansi_color_to_json(&color)).unwrap();
-                    segment.options.insert("critical_color".to_string(), color_json);
+                    let color_str = color_utils::serialize_ansi_color_to_json(&color);
+                    if let Ok(color_json) = serde_json::from_str::<serde_json::Value>(&color_str) {
+                        segment.options.insert("critical_color".to_string(), color_json);
+                    }
                 }
                 _ => {}
             }
