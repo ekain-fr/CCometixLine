@@ -1,3 +1,4 @@
+pub mod color_utils;
 pub mod context_window;
 pub mod cost;
 pub mod directory;

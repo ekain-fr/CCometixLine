@@ -1,4 +1,5 @@
 use crate::config::{Config, SegmentId, StyleMode};
+use crate::core::segments::color_utils;
 use crate::ui::components::{
     color_picker::{ColorPickerComponent, NavDirection},
     help::HelpComponent,
@@ -716,33 +717,13 @@ impl App {
                 FieldSelection::TextColor => segment.colors.text = Some(color),
                 FieldSelection::BackgroundColor => segment.colors.background = Some(color),
                 FieldSelection::WarningColor => {
-                    // Store warning color in options
-                    let color_json = match color {
-                        crate::config::AnsiColor::Color256 { c256 } => {
-                            serde_json::json!({"c256": c256})
-                        }
-                        crate::config::AnsiColor::Color16 { c16 } => {
-                            serde_json::json!({"c16": c16})
-                        }
-                        crate::config::AnsiColor::Rgb { r, g, b } => {
-                            serde_json::json!({"r": r, "g": g, "b": b})
-                        }
-                    };
+                    // Store warning color in options using shared helper
+                    let color_json: serde_json::Value = serde_json::from_str(&color_utils::serialize_ansi_color_to_json(&color)).unwrap();
                     segment.options.insert("warning_color".to_string(), color_json);
                 }
                 FieldSelection::CriticalColor => {
-                    // Store critical color in options
-                    let color_json = match color {
-                        crate::config::AnsiColor::Color256 { c256 } => {
-                            serde_json::json!({"c256": c256})
-                        }
-                        crate::config::AnsiColor::Color16 { c16 } => {
-                            serde_json::json!({"c16": c16})
-                        }
-                        crate::config::AnsiColor::Rgb { r, g, b } => {
-                            serde_json::json!({"r": r, "g": g, "b": b})
-                        }
-                    };
+                    // Store critical color in options using shared helper
+                    let color_json: serde_json::Value = serde_json::from_str(&color_utils::serialize_ansi_color_to_json(&color)).unwrap();
                     segment.options.insert("critical_color".to_string(), color_json);
                 }
                 _ => {}
