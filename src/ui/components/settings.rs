@@ -155,7 +155,7 @@ impl SettingsComponent {
             // Check if this is a usage segment to show threshold fields
             let is_usage_segment = matches!(
                 segment.id,
-                SegmentId::Usage5Hour | SegmentId::Usage7Day
+                SegmentId::Usage5Hour | SegmentId::Usage7Day | SegmentId::ContextWindow
             );
 
             let mut lines = vec![

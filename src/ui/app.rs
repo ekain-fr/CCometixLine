@@ -465,7 +465,7 @@ impl App {
             Panel::Settings => {
                 // Check if current segment is a usage segment to determine field count
                 let is_usage_segment = self.config.segments.get(self.selected_segment)
-                    .map(|s| matches!(s.id, crate::config::SegmentId::Usage5Hour | crate::config::SegmentId::Usage7Day))
+                    .map(|s| matches!(s.id, crate::config::SegmentId::Usage5Hour | crate::config::SegmentId::Usage7Day | crate::config::SegmentId::ContextWindow))
                     .unwrap_or(false);
 
                 let field_count = if is_usage_segment {
