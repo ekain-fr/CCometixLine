@@ -147,17 +147,53 @@ impl PreviewComponent {
                         map
                     },
                 },
-                SegmentId::Git => SegmentData {
-                    primary: "master".to_string(),
-                    secondary: "✓".to_string(),
-                    metadata: {
-                        let mut map = HashMap::new();
-                        map.insert("branch".to_string(), "master".to_string());
-                        map.insert("status".to_string(), "Clean".to_string());
-                        map.insert("ahead".to_string(), "0".to_string());
-                        map.insert("behind".to_string(), "0".to_string());
-                        map
-                    },
+                SegmentId::Git => {
+                    // Read Git segment options
+                    let show_sha = segment_config
+                        .options
+                        .get("show_sha")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
+                    let show_dirty_count = segment_config
+                        .options
+                        .get("show_dirty_count")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
+
+                    // Build secondary status (mimics real Git segment behavior)
+                    let mut status_parts = Vec::new();
+
+                    // Use dirty status with count for demo
+                    if show_dirty_count {
+                        status_parts.push("● 5".to_string()); // Mock: 5 dirty files
+                    } else {
+                        status_parts.push("●".to_string());
+                    }
+
+                    // Mock ahead/behind
+                    status_parts.push("↑2".to_string()); // Mock: 2 commits ahead
+
+                    // Add SHA if enabled
+                    if show_sha {
+                        status_parts.push("a1b2c3d".to_string()); // Mock SHA
+                    }
+
+                    SegmentData {
+                        primary: "feat/demo".to_string(),
+                        secondary: status_parts.join(" "),
+                        metadata: {
+                            let mut map = HashMap::new();
+                            map.insert("branch".to_string(), "feat/demo".to_string());
+                            map.insert("status".to_string(), "Dirty".to_string());
+                            map.insert("ahead".to_string(), "2".to_string());
+                            map.insert("behind".to_string(), "0".to_string());
+                            map.insert("dirty_count".to_string(), "5".to_string());
+                            if show_sha {
+                                map.insert("sha".to_string(), "a1b2c3d".to_string());
+                            }
+                            map
+                        },
+                    }
                 },
                 SegmentId::ContextWindow => SegmentData {
                     primary: "78.2%".to_string(),
