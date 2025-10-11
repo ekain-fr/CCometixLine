@@ -29,6 +29,7 @@ use std::io;
 // These represent the number of configurable fields in the Settings panel
 const DEFAULT_SEGMENT_FIELD_COUNT: usize = 7;  // Enabled, Icon, IconColor, TextColor, BackgroundColor, TextStyle, Options
 const THRESHOLD_SEGMENT_FIELD_COUNT: usize = 13; // Default fields + WarningThreshold, CriticalThreshold, WarningColor, CriticalColor, WarningBold, CriticalBold
+const GIT_SEGMENT_FIELD_COUNT: usize = 9; // Default fields + ShowSha, ShowDirtyCount
 
 pub struct App {
     config: Config,
@@ -468,13 +469,19 @@ impl App {
                 self.selected_segment = new_selection;
             }
             Panel::Settings => {
-                // Check if current segment is a usage segment to determine field count
+                // Check segment type to determine field count
                 let is_usage_segment = self.config.segments.get(self.selected_segment)
                     .map(|s| matches!(s.id, crate::config::SegmentId::Usage5Hour | crate::config::SegmentId::Usage7Day | crate::config::SegmentId::ContextWindow))
                     .unwrap_or(false);
 
+                let is_git_segment = self.config.segments.get(self.selected_segment)
+                    .map(|s| matches!(s.id, crate::config::SegmentId::Git))
+                    .unwrap_or(false);
+
                 let field_count = if is_usage_segment {
                     THRESHOLD_SEGMENT_FIELD_COUNT
+                } else if is_git_segment {
+                    GIT_SEGMENT_FIELD_COUNT
                 } else {
                     DEFAULT_SEGMENT_FIELD_COUNT
                 };
@@ -492,7 +499,9 @@ impl App {
                     FieldSelection::CriticalColor => 9,
                     FieldSelection::WarningBold => 10,
                     FieldSelection::CriticalBold => 11,
-                    FieldSelection::Options => 12,
+                    FieldSelection::ShowSha => 6,
+                    FieldSelection::ShowDirtyCount => 7,
+                    FieldSelection::Options => if is_usage_segment { 12 } else if is_git_segment { 8 } else { 6 },
                 };
                 let new_field = (current_field + delta).clamp(0, (field_count - 1) as i32) as usize;
                 self.selected_field = match new_field {
@@ -509,7 +518,10 @@ impl App {
                     10 if is_usage_segment => FieldSelection::WarningBold,
                     11 if is_usage_segment => FieldSelection::CriticalBold,
                     12 if is_usage_segment => FieldSelection::Options,
-                    6 => FieldSelection::Options, // For non-usage segments
+                    6 if is_git_segment => FieldSelection::ShowSha,
+                    7 if is_git_segment => FieldSelection::ShowDirtyCount,
+                    8 if is_git_segment => FieldSelection::Options,
+                    6 => FieldSelection::Options, // For default segments
                     _ => FieldSelection::Enabled,
                 };
             }
@@ -675,6 +687,46 @@ impl App {
                             );
                             self.status_message = Some(format!(
                                 "Critical bold {}",
+                                if new_value { "enabled" } else { "disabled" }
+                            ));
+                            self.preview.update_preview(&self.config);
+                        }
+                    }
+                    FieldSelection::ShowSha => {
+                        // Toggle show_sha option for Git segment
+                        if let Some(segment) = self.config.segments.get_mut(self.selected_segment) {
+                            let current = segment
+                                .options
+                                .get("show_sha")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false);
+                            let new_value = !current;
+                            segment.options.insert(
+                                "show_sha".to_string(),
+                                serde_json::Value::Bool(new_value),
+                            );
+                            self.status_message = Some(format!(
+                                "Show SHA {}",
+                                if new_value { "enabled" } else { "disabled" }
+                            ));
+                            self.preview.update_preview(&self.config);
+                        }
+                    }
+                    FieldSelection::ShowDirtyCount => {
+                        // Toggle show_dirty_count option for Git segment
+                        if let Some(segment) = self.config.segments.get_mut(self.selected_segment) {
+                            let current = segment
+                                .options
+                                .get("show_dirty_count")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false);
+                            let new_value = !current;
+                            segment.options.insert(
+                                "show_dirty_count".to_string(),
+                                serde_json::Value::Bool(new_value),
+                            );
+                            self.status_message = Some(format!(
+                                "Show dirty count {}",
                                 if new_value { "enabled" } else { "disabled" }
                             ));
                             self.preview.update_preview(&self.config);

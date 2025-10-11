@@ -158,6 +158,9 @@ impl SettingsComponent {
                 SegmentId::Usage5Hour | SegmentId::Usage7Day | SegmentId::ContextWindow
             );
 
+            // Check if this is a Git segment to show Git-specific options
+            let is_git_segment = matches!(segment.id, SegmentId::Git);
+
             let mut lines = vec![
                 Line::from(format!("{} Segment", segment_name)),
                 create_field_line(
@@ -217,6 +220,37 @@ impl SettingsComponent {
                     ))],
                 ),
             ];
+
+            // Add Git-specific options
+            if is_git_segment {
+                let show_sha = segment
+                    .options
+                    .get("show_sha")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+                let show_dirty_count = segment
+                    .options
+                    .get("show_dirty_count")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+
+                lines.extend(vec![
+                    create_field_line(
+                        FieldSelection::ShowSha,
+                        vec![Span::raw(format!(
+                            "├─ Show SHA: {}",
+                            if show_sha { "[✓]" } else { "[ ]" }
+                        ))],
+                    ),
+                    create_field_line(
+                        FieldSelection::ShowDirtyCount,
+                        vec![Span::raw(format!(
+                            "├─ Show Dirty Count: {}",
+                            if show_dirty_count { "[✓]" } else { "[ ]" }
+                        ))],
+                    ),
+                ]);
+            }
 
             // Add threshold fields for usage segments
             if is_usage_segment {
