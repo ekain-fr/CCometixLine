@@ -29,6 +29,9 @@ pub enum FieldSelection {
     CriticalColor,
     WarningBold,
     CriticalBold,
+    // Git segment options
+    ShowSha,
+    ShowDirtyCount,
 }
 
 #[derive(Default)]
