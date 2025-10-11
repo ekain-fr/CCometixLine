@@ -165,7 +165,7 @@ impl PreviewComponent {
 
                     // Use dirty status with count for demo
                     if show_dirty_count {
-                        status_parts.push("● 5".to_string()); // Mock: 5 dirty files
+                        status_parts.push("●5".to_string()); // Mock: 5 dirty files
                     } else {
                         status_parts.push("●".to_string());
                     }
