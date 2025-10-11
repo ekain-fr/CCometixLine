@@ -212,14 +212,14 @@ impl Segment for GitSegment {
             GitStatus::Clean => status_parts.push("✓".to_string()),
             GitStatus::Dirty => {
                 if self.show_dirty_count && git_info.dirty_count > 0 {
-                    status_parts.push(format!("● {}", git_info.dirty_count));
+                    status_parts.push(format!("●{}", git_info.dirty_count));
                 } else {
                     status_parts.push("●".to_string());
                 }
             }
             GitStatus::Conflicts => {
                 if self.show_dirty_count && git_info.dirty_count > 0 {
-                    status_parts.push(format!("⚠ {}", git_info.dirty_count));
+                    status_parts.push(format!("⚠{}", git_info.dirty_count));
                 } else {
                     status_parts.push("⚠".to_string());
                 }
